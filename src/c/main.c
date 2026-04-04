@@ -155,7 +155,7 @@ static void draw_digit(GContext *ctx, uint16_t x, uint16_t y, uint16_t size, uin
     }
 }
 
-static void canvas_update_proc(Layer *layer, GContext *ctx)
+static void update_canvas(Layer *layer, GContext *ctx)
 {
     time_t temp_time = time(NULL);
     tm current_time = *localtime(&temp_time);
@@ -209,7 +209,7 @@ static void main_window_load(Window *window)
     GRect bounds = layer_get_bounds(window_layer);
 
     s_canvas_layer = layer_create(bounds);
-    layer_set_update_proc(s_canvas_layer, canvas_update_proc);
+    layer_set_update_proc(s_canvas_layer, update_canvas);
     layer_add_child(window_layer, s_canvas_layer);
 }
 
