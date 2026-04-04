@@ -3,8 +3,6 @@
 static Window *s_main_window;
 static Layer *s_canvas_layer;
 
-static struct tm s_last_time;
-
 #define USE_SECONDS 0
 
 // Blocks
@@ -159,6 +157,9 @@ static void draw_digit(GContext *ctx, uint16_t x, uint16_t y, uint16_t size, uin
 
 static void canvas_update_proc(Layer *layer, GContext *ctx)
 {
+    time_t temp_time = time(NULL);
+    tm current_time = *localtime(&temp_time);
+
     // Fill background black
     GRect bounds = layer_get_bounds(layer);
     graphics_context_set_fill_color(ctx, GColorBlack);
@@ -187,18 +188,18 @@ static void canvas_update_proc(Layer *layer, GContext *ctx)
     uint16_t spacing = (size + 1) * 3 + gap;
     uint16_t y_position = (bounds.size.h - (size + 1) * 5) / 2;
 
-    draw_digit(ctx, x_position + spacing * 0, y_position, size, s_last_time.tm_hour / 10);
-    draw_digit(ctx, x_position + spacing * 1, y_position, size, s_last_time.tm_hour % 10);
-    draw_digit(ctx, x_position + spacing * 2, y_position, size, s_last_time.tm_min / 10);
-    draw_digit(ctx, x_position + spacing * 3, y_position, size, s_last_time.tm_min % 10);
+    draw_digit(ctx, x_position + spacing * 0, y_position, size, current_time.tm_hour / 10);
+    draw_digit(ctx, x_position + spacing * 1, y_position, size, current_time.tm_hour % 10);
+    draw_digit(ctx, x_position + spacing * 2, y_position, size, current_time.tm_min / 10);
+    draw_digit(ctx, x_position + spacing * 3, y_position, size, current_time.tm_min % 10);
 
     if (show_seconds) {
         uint16_t seconds_size = size * 3 / 5;
         x_position = x_position + spacing * 4 + minute_second_gap;
         y_position = (bounds.size.h + (size + 1) * 5) / 2 - (seconds_size + 1) * 5;
         spacing = (seconds_size + 1) * 3 + gap;
-        draw_digit(ctx, x_position + spacing * 0, y_position, seconds_size, s_last_time.tm_sec / 10);
-        draw_digit(ctx, x_position + spacing * 1, y_position, seconds_size, s_last_time.tm_sec % 10);
+        draw_digit(ctx, x_position + spacing * 0, y_position, seconds_size, current_time.tm_sec / 10);
+        draw_digit(ctx, x_position + spacing * 1, y_position, seconds_size, current_time.tm_sec % 10);
     }
 }
 
@@ -219,7 +220,6 @@ static void main_window_unload(Window *window)
 
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed)
 {
-    s_last_time = *tick_time;
     layer_mark_dirty(s_canvas_layer);
 }
 
