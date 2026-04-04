@@ -5,6 +5,8 @@ static Layer *s_canvas_layer;
 
 static struct tm s_last_time;
 
+#define USE_SECONDS 0
+
 // Blocks
 // 0: empty
 // 1: square
@@ -41,7 +43,7 @@ static void draw_block(GContext *ctx, uint16_t x, uint16_t y, uint16_t size, uin
         return;
     }
     uint16_t size_s = size - 1;
-    uint16_t threshold = size_s * size_s + 10;
+    uint16_t threshold = size_s * size_s + size_s;
     if (block == 2) {
         for (uint16_t px = 0; px < size; px++) {
             for (uint16_t py = 0; py < size; py++) {
@@ -158,17 +160,18 @@ static void draw_digit(GContext *ctx, uint16_t x, uint16_t y, uint16_t size, uin
 static void canvas_update_proc(Layer *layer, GContext *ctx)
 {
     // Fill background black
-
     GRect bounds = layer_get_bounds(layer);
-
     graphics_context_set_fill_color(ctx, GColorBlack);
     graphics_fill_rect(ctx, bounds, 0, GCornerNone);
-
     
     graphics_context_set_fill_color(ctx, GColorWhite);
     graphics_context_set_stroke_color(ctx, GColorWhite);
 
-    const bool show_seconds = true;
+    #if USE_SECONDS
+        const bool show_seconds = true;
+    #else
+        const bool show_seconds = false;
+    #endif
 
     const uint16_t gap = 3;
     const uint16_t minute_second_gap = 3;
@@ -230,7 +233,11 @@ static void init(void)
                                                   .unload = main_window_unload});
 
     window_stack_push(s_main_window, true);
-    tick_timer_service_subscribe(SECOND_UNIT, tick_handler);
+    #ifdef USE_SECONDS
+        tick_timer_service_subscribe(SECOND_UNIT, tick_handler);
+    #elif
+        tick_timer_service_subscribe(MINUTE_UNIT, tick_handler);
+    #endif
 }
 
 static void deinit(void)
