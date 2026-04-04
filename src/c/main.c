@@ -179,10 +179,10 @@ static void canvas_update_proc(Layer *layer, GContext *ctx)
     uint16_t size;
     uint16_t x_position;
     if (show_seconds) {
-        size = (bounds.size.w - gap * 5) * 5 / 78 - 1;
+        size = (bounds.size.w - gap * 5 - PBL_IF_ROUND_ELSE(bounds.size.w / 16, 0)) * 5 / 78 - 1;
         x_position = (bounds.size.w - (size + 1) * 78 / 5 - gap * 5 - minute_second_gap) / 2;
     } else {
-        size = (bounds.size.w - gap * 3) / 12 - 1;
+        size = (bounds.size.w - gap * 3 - PBL_IF_ROUND_ELSE(bounds.size.w / 10, 0)) / 12 - 1;
         x_position = (bounds.size.w - (size + 1) * 12 - gap * 3) / 2;
     }
     uint16_t spacing = (size + 1) * 3 + gap;
