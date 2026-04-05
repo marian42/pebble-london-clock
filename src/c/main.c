@@ -5,6 +5,34 @@ static Layer *s_canvas_layer;
 
 #define USE_SECONDS 0
 
+#define SETTINGS_KEY 1
+
+typedef struct ClaySettings {
+  GColor BackgroundColor;
+  GColor TextColor;
+  bool TemperatureUnit; // false = Celsius, true = Fahrenheit
+  bool ShowDate;
+} ClaySettings;
+
+static ClaySettings settings;
+
+static void prv_default_settings() {
+  settings.BackgroundColor = GColorBlack;
+  settings.TextColor = GColorWhite;
+  settings.TemperatureUnit = false;
+  settings.ShowDate = true;
+}
+
+static void prv_save_settings() {
+  persist_write_data(SETTINGS_KEY, &settings, sizeof(settings));
+}
+
+static void prv_load_settings() {
+  prv_default_settings();
+  persist_read_data(SETTINGS_KEY, &settings, sizeof(settings));
+}
+
+
 // Blocks
 // 0: empty
 // 1: square
@@ -225,6 +253,8 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed)
 
 static void init(void)
 {
+    prv_load_settings();
+    
     s_main_window = window_create();
     window_set_background_color(s_main_window, GColorBlack);
 
