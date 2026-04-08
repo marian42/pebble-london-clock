@@ -7,7 +7,7 @@
   "dependencies": {},
   "pebble": {
     "displayName": "London Underground Clock",
-    "uuid": "00000000-0000-0000-0000-000000000001",
+    "uuid": "f46d9546-3133-48dd-97a9-c9ba0c6ba36b",
     "sdkVersion": "3",
     "enableMultiJS": true,
     "targetPlatforms": [
