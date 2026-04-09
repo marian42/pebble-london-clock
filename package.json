@@ -2,14 +2,21 @@
   "name": "londonundergroundclock",
   "author": "Marian Kleineberg",
   "version": "1.0.0",
-  "keywords": ["pebble-app"],
+  "keywords": [
+    "pebble-app"
+  ],
   "private": true,
-  "dependencies": {},
+  "dependencies": {
+    "@rebble/clay": "^1.0.8"
+  },
   "pebble": {
     "displayName": "London Underground Clock",
     "uuid": "f46d9546-3133-48dd-97a9-c9ba0c6ba36b",
     "sdkVersion": "3",
     "enableMultiJS": true,
+    "capabilities": [
+      "configurable"
+    ],
     "targetPlatforms": [
       "aplite",
       "basalt",
@@ -22,7 +29,7 @@
       "watchface": true
     },
     "messageKeys": [
-      "dummy"
+      "ShowSeconds"
     ],
     "resources": {
       "media": []
