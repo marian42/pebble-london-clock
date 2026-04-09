@@ -29,10 +29,7 @@
       "watchface": true
     },
     "messageKeys": [
-      "BackgroundColor",
-      "TextColor",
-      "TemperatureUnit",
-      "ShowDate"
+      "ShowSeconds"
     ],
     "resources": {
       "media": []

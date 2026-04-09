@@ -3,24 +3,16 @@
 static Window *s_main_window;
 static Layer *s_canvas_layer;
 
-#define USE_SECONDS 0
-
 #define SETTINGS_KEY 1
 
 typedef struct ClaySettings {
-  GColor BackgroundColor;
-  GColor TextColor;
-  bool TemperatureUnit; // false = Celsius, true = Fahrenheit
-  bool ShowDate;
+  bool ShowSeconds;
 } ClaySettings;
 
 static ClaySettings settings;
 
 static void prv_default_settings() {
-  settings.BackgroundColor = GColorBlack;
-  settings.TextColor = GColorWhite;
-  settings.TemperatureUnit = false;
-  settings.ShowDate = true;
+  settings.ShowSeconds = false;
 }
 
 static void prv_save_settings() {
@@ -196,17 +188,11 @@ static void update_canvas(Layer *layer, GContext *ctx)
     graphics_context_set_fill_color(ctx, GColorWhite);
     graphics_context_set_stroke_color(ctx, GColorWhite);
 
-    #if USE_SECONDS
-        const bool show_seconds = true;
-    #else
-        const bool show_seconds = false;
-    #endif
-
     const uint16_t gap = 3;
     const uint16_t minute_second_gap = 3;
     uint16_t size;
     uint16_t x_position;
-    if (show_seconds) {
+    if (settings.ShowSeconds) {
         size = (bounds.size.w - gap * 5 - PBL_IF_ROUND_ELSE(bounds.size.w / 16, 0)) * 5 / 78 - 1;
         x_position = (bounds.size.w - (size + 1) * 78 / 5 - gap * 5 - minute_second_gap) / 2;
     } else {
@@ -221,7 +207,7 @@ static void update_canvas(Layer *layer, GContext *ctx)
     draw_digit(ctx, x_position + spacing * 2, y_position, size, current_time.tm_min / 10);
     draw_digit(ctx, x_position + spacing * 3, y_position, size, current_time.tm_min % 10);
 
-    if (show_seconds) {
+    if (settings.ShowSeconds) {
         uint16_t seconds_size = size * 3 / 5;
         x_position = x_position + spacing * 4 + minute_second_gap;
         y_position = (bounds.size.h + (size + 1) * 5) / 2 - (seconds_size + 1) * 5;
@@ -230,6 +216,19 @@ static void update_canvas(Layer *layer, GContext *ctx)
         draw_digit(ctx, x_position + spacing * 1, y_position, seconds_size, current_time.tm_sec % 10);
     }
 }
+
+static void inbox_received_callback(DictionaryIterator *iterator, void *context) {
+  Tuple *kvp_show_seconds_setting = dict_find(iterator, MESSAGE_KEY_ShowSeconds);
+  if (kvp_show_seconds_setting) {
+    settings.ShowSeconds = kvp_show_seconds_setting->value->int32 == 1;
+  }
+
+  if (kvp_show_seconds_setting) {
+    prv_save_settings();
+    layer_mark_dirty(s_canvas_layer);
+  }
+}
+
 
 static void main_window_load(Window *window)
 {
@@ -263,11 +262,11 @@ static void init(void)
                                                   .unload = main_window_unload});
 
     window_stack_push(s_main_window, true);
-    #ifdef USE_SECONDS
-        tick_timer_service_subscribe(SECOND_UNIT, tick_handler);
-    #elif
-        tick_timer_service_subscribe(MINUTE_UNIT, tick_handler);
-    #endif
+    
+    tick_timer_service_subscribe(SECOND_UNIT, tick_handler);
+    
+    app_message_register_inbox_received(inbox_received_callback);
+    app_message_open(128, 128); // inbox, outbox sizes
 }
 
 static void deinit(void)
