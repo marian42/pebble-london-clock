@@ -217,18 +217,6 @@ static void update_canvas(Layer *layer, GContext *ctx)
     }
 }
 
-static void inbox_received_callback(DictionaryIterator *iterator, void *context) {
-  Tuple *kvp_show_seconds_setting = dict_find(iterator, MESSAGE_KEY_ShowSeconds);
-  if (kvp_show_seconds_setting) {
-    settings.ShowSeconds = kvp_show_seconds_setting->value->int32 == 1;
-  }
-
-  if (kvp_show_seconds_setting) {
-    prv_save_settings();
-    layer_mark_dirty(s_canvas_layer);
-  }
-}
-
 
 static void main_window_load(Window *window)
 {
@@ -250,6 +238,19 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed)
     layer_mark_dirty(s_canvas_layer);
 }
 
+static void inbox_received_callback(DictionaryIterator *iterator, void *context) {
+  Tuple *kvp_show_seconds_setting = dict_find(iterator, MESSAGE_KEY_ShowSeconds);
+  if (kvp_show_seconds_setting) {
+    settings.ShowSeconds = kvp_show_seconds_setting->value->int32 == 1;
+  }
+
+  if (kvp_show_seconds_setting) {
+    prv_save_settings();    
+    tick_timer_service_subscribe(settings.ShowSeconds ? SECOND_UNIT : MINUTE_UNIT, tick_handler);
+    layer_mark_dirty(s_canvas_layer);
+  }
+}
+
 static void init(void)
 {
     prv_load_settings();
@@ -263,7 +264,7 @@ static void init(void)
 
     window_stack_push(s_main_window, true);
     
-    tick_timer_service_subscribe(SECOND_UNIT, tick_handler);
+    tick_timer_service_subscribe(settings.ShowSeconds ? SECOND_UNIT : MINUTE_UNIT, tick_handler);
     
     app_message_register_inbox_received(inbox_received_callback);
     app_message_open(128, 128); // inbox, outbox sizes
